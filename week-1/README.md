@@ -35,7 +35,7 @@ DER (imagen o PDF)
 Modelo relacional (imagen o PDF)
 Ambos deben reflejar exactamente las mismas estructuras y relaciones.
 Nómbralos claramente (ej.: DER.pdf y ModeloRelacional.pdf).
----
+
 ## Criterios de aceptación
 Se evidencia normalización hasta 3FN en el diseño.
 El DER define entidades, relaciones, PK y FK de forma clara.
