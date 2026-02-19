@@ -1,13 +1,13 @@
 # Historia de usuario - Semana 1
----
+
 ## Diseño conceptual y lógico de la base de datos (DER → Modelo relacional)
----
+
 ## Objetivo de la Historia de usuario
 Como usuario analista del Hospital "Vida Sana":
 Diseñar una base de datos relacional (modelo conceptual y modelo relacional normalizados) para gestionar pacientes, médicos, citas y diagnósticos de forma consistente y sin duplicidades.
 Aplicar principios de modelado conceptual y lógico, incluyendo DER, modelo relacional y normalización hasta tercera forma normal.
 No incluye: scripts SQL de creación, carga de datos ni interfaz gráfica.
----
+
 ## Descripción de las tareas
 ### TASK 1
 1. Análisis y planificación del problema:
