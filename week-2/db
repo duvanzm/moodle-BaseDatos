@@ -1,0 +1,215 @@
+/*1. Diseño inicial y creación de la base de datos:
+Crea la base de datos: gestion_academica_universidad.*/
+
+CREATE DATABASE gestion_academica_universidad;
+
+USE gestion_academica_universidad;
+
+/*
+Diseña las tablas con los siguientes campos mínimos y llaves:
+estudiantes: id_estudiante (PK, autoincremental), nombre_completo, correo_electronico, genero, identificacion (UNIQUE), carrera, 
+fecha_nacimiento, fecha_ingreso
+*/
+
+CREATE TABLE estudiantes (
+id_estudiante INT AUTO_INCREMENT PRIMARY KEY,
+nombre_completo VARCHAR(100) NOT NULL,
+correo_electronico VARCHAR(100) NOT NULL UNIQUE ,
+genero ENUM('m', 'f', 'otro') NOT NULL,
+identificacion VARCHAR(20) NOT NULL UNIQUE,
+carrera VARCHAR(25)NOT NULL,
+fecha_ingreso DATE NOT NULL,
+fecha_nacimiento DATE NOT NULL
+)
+
+/*
+docentes: id_docente (PK, autoincremental), nombre_completo, correo_institucional, departamento_academico, anios_experiencia
+*/
+
+CREATE TABLE docentes (
+id_docente INT AUTO_INCREMENT PRIMARY KEY,
+nombre_completo VARCHAR(100) NOT NULL,
+correo_institucional VARCHAR(100) NOT NULL UNIQUE,
+departamento_academico VARCHAR(100) NOT NULL,
+anios_experiencia TINYINT UNSIGNED NOT NULL,
+CHECK (anios_experiencia <= 50)
+)
+
+/*
+cursos: id_curso (PK, autoincremental), nombre, codigo (UNIQUE), creditos, semestre, id_docente (FK)*/
+
+CREATE TABLE cursos (
+id_curso INT AUTO_INCREMENT PRIMARY KEY,
+nombre VARCHAR(70) NOT NULL,
+codigo VARCHAR (25) UNIQUE NOT NULL,
+creditos TINYINT UNSIGNED NOT NULL,
+semestre TINYINT UNSIGNED NOT NULL,
+id_docente INT,
+FOREIGN KEY (id_docente) REFERENCES docentes(id_docente)
+)
+
+/*inscripciones: id_inscripcion (PK, autoincremental), id_estudiante (FK), id_curso (FK), fecha_inscripcion, calificacion_final
+Aplica NOT NULL, UNIQUE, FOREIGN KEY y CHECK donde corresponda.*/
+
+CREATE TABLE inscripciones (
+id_inscripcion INT AUTO_INCREMENT PRIMARY KEY,
+id_estudiante INT,
+FOREIGN KEY (id_estudiante) REFERENCES estudiantes(id_estudiante),
+id_curso INT,
+FOREIGN KEY (id_curso) REFERENCES cursos(id_curso),
+fecha_inscripcion DATE NOT NULL,
+calificacion_final DECIMAL(1,1) CHECK (calificacion_final BETWEEN 0 AND 5),
+)
+
+
+/*2. Inserción de datos:
+Inserta al menos 5 estudiantes, 3 docentes y 4 cursos.
+Genera 8 inscripciones distribuidas entre cursos y estudiantes.*/
+
+INSERT INTO estudiantes (nombre_completo, correo_electronico, genero, identificacion, carrera, fecha_nacimiento, fecha_ingreso) VALUES
+('Juan Pérez', 'juan.perez@universidad.edu.co', 'm', '123456789', 'Ingeniería de Sistemas', '2000-05-15', '2020-08-01'),
+('María López', 'maria.lopez@universidad.edu.co', 'f', '987654321', 'Arquitectura', '1999-12-20', '2019-08-01'),
+('Carlos Ramírez', 'carlos.ramirez@universidad.edu.co', 'm', '456789123', 'Derecho', '2001-03-10', '2021-08-01'),
+('Ana Martínez', 'ana.martinez@universidad.edu.co', 'f', '321654987', 'Medicina', '2000-07-25', '2020-08-01'),
+('Luis González', 'luis.gonzalez@universidad.edu.co', 'm', '654987321', 'Psicología', '1998-11-30', '2018-08-01');
+
+INSERT INTO docentes (nombre_completo, correo_institucional, departamento_academico, anios_experiencia) VALUES
+('Dr. Carlos Silva','carlos.silva@universidad.edu.co','Ingeniería de Sistemas','5'),
+('Dr. Ana Rodríguez','ana.rodriguez@universidad.edu.co','Arquitectura','7'),
+('Dr. Miguel Torres','miguel.torres@universidad.edu.co','Derecho','4');
+
+INSERT INTO cursos (nombre, codigo, creditos, semestre, id_docente) VALUES
+('Programación Avanzada','PROG_456789','3','4','1'),
+('Diseño Arquitectónico','ARQ_789456','4','3','2'),
+('Derecho Penal','DER_321654','3','5','3'),
+('Psicología Clínica','PSI_654321','4','6','3');
+
+ALTER TABLE inscripciones 
+MODIFY calificacion_final DECIMAL(2,1),
+ADD CONSTRAINT CHECK (calificacion_final BETWEEN 0 AND 5)
+
+INSERT INTO inscripciones (id_estudiante, id_curso, fecha_inscripcion, calificacion_final) VALUES
+(1, 1, '2018-08-01', 4.5),
+(2, 2, '2018-08-01', 4.7),
+(3, 3, '2018-08-01', 4.8),
+(4, 4, '2018-08-01', 4.6),
+(5, 4, '2018-08-01', 4.9),
+(1, 3, '2018-08-01', 4.7),
+(2, 4, '2018-08-01', 4.8),
+(3, 1, '2018-08-01', 4.6);
+
+/*3. Consultas básicas y manipulación:
+
+Listar todos los estudiantes con sus inscripciones y cursos (JOIN).
+*/
+SELECT e.nombre_completo, c.nombre AS curso, i.fecha_inscripcion, i.calificacion_final
+FROM estudiantes e
+JOIN inscripciones i ON e.id_estudiante = i.id_estudiante
+JOIN cursos c ON i.id_curso = c.id_curso;     
+
+/*Listar cursos dictados por docentes con > 5 años de experiencia.*/
+SELECT c.nombre AS curso, d.nombre_completo AS docente              
+FROM cursos c
+JOIN docentes d ON c.id_docente = d.id_docente
+WHERE d.anios_experiencia > 5;   
+
+/*Obtener promedio de calificaciones por curso (GROUP BY + AVG).*/
+
+SELECT c.nombre AS curso, AVG(i.calificacion_final) AS promedio_calificacion
+FROM cursos c           
+JOIN inscripciones i ON c.id_curso = i.id_curso
+GROUP BY c.id_curso;
+
+/*Mostrar estudiantes inscritos en más de un curso (HAVING COUNT(*) > 1).*/
+
+SELECT e.nombre_completo AS nombre, COUNT(*) AS cantidad_cursos   
+FROM estudiantes e
+JOIN inscripciones i ON e.id_estudiante = i.id_estudiante
+GROUP BY e.id_estudiante
+HAVING COUNT(*) > 1;
+
+/*ALTER TABLE: agregar columna estado_academico a estudiantes.
+Eliminar un docente y observar el efecto en cursos (revisar ON DELETE en la FK).*/
+
+
+ALTER TABLE estudiantes ADD COLUMN estado_academico VARCHAR(20) NOT NULL DEFAULT 'activo';
+DELETE FROM docentes WHERE id_docente = 1;
+
+/*Consultar cursos con más de 2 estudiantes inscritos (GROUP BY + COUNT + HAVING).*/
+
+ 
+SELECT c.nombre AS curso, COUNT(i.id_estudiante) AS cantidad_estudiantes
+FROM cursos c
+JOIN inscripciones i ON c.id_curso = i.id_curso
+GROUP BY c.id_curso     
+HAVING COUNT(*) > 2;    
+
+/* 
+4. Subconsultas y funciones: */
+
+/*
+Estudiantes cuya calificación promedio sea > promedio general (AVG() + subconsulta).*/
+
+SELECT e.nombre_completo, AVG(i.calificacion_final) AS promedio_estudiante
+FROM estudiantes e
+JOIN inscripciones i ON e.id_estudiante = i.id_estudiante
+GROUP BY e.id_estudiante
+HAVING AVG(i.calificacion_final) > (SELECT AVG(calificacion_final) FROM inscripciones);
+
+/*
+Nombres de carreras con estudiantes inscritos en cursos del semestre ≥ 2 (IN o EXISTS).*/
+
+SELECT DISTINCT e.carrera
+FROM estudiantes e
+WHERE EXISTS (                                          
+    SELECT 1
+    FROM inscripciones i
+    JOIN cursos c ON i.id_curso = c.id_curso
+    WHERE i.id_estudiante = e.id_estudiante AND c.semestre >= 2
+);  
+
+
+/*
+Usar ROUND, SUM, MAX, MIN, COUNT para obtener indicadores.(Esta tarea se apoya en el soporte temático de la semana sobre DQL, filtros, agregaciones, GROUP BY/HAVING y funciones)*/
+
+SELECT c.nombre AS curso, 
+       COUNT(i.id_estudiante) AS cantidad_estudiantes, 
+       AVG(i.calificacion_final) AS promedio_calificacion,
+       MAX(i.calificacion_final) AS calificacion_maxima,
+       MIN(i.calificacion_final) AS calificacion_minima
+FROM cursos c
+JOIN inscripciones i ON c.id_curso = i.id_curso
+GROUP BY c.id_curso;
+
+/*
+5. Creación de una vista:
+Crea la vista vista_historial_academico que muestre: nombre del estudiante, nombre del curso, nombre del docente, semestre y calificación final.*/
+
+CREATE VIEW vista_historial_academico AS
+SELECT e.nombre_completo AS estudiante, c.nombre AS curso, d.nombre_completo AS docente, c.semestre, i.calificacion_final
+FROM estudiantes e
+JOIN inscripciones i ON e.id_estudiante = i.id_estudiante
+JOIN cursos c ON i.id_curso = c.id_curso
+JOIN docentes d ON c.id_docente = d.id_docente;     
+
+/*
+6. Control de acceso y transacciones:
+Otorga permisos de solo lectura a un rol revisor_academico sobre la vista (GRANT SELECT).*/
+
+GRANT SELECT ON vista_historial_academico TO 'revisor_academico'@'localhost';   
+
+/*
+Revoca permisos de modificación de datos en inscripciones para ese rol (REVOKE).*/
+
+REVOKE INSERT, UPDATE, DELETE ON inscripciones FROM 'revisor_academico'@'localhost';
+
+/*
+Simula actualización de calificaciones usando BEGIN, SAVEPOINT, ROLLBACK y COMMIT.*/
+
+BEGIN;
+UPDATE inscripciones SET calificacion_final = 4.0 WHERE id_inscripcion = 1;
+SAVEPOINT antes_de_cambio;
+UPDATE inscripciones SET calificacion_final = 3.5 WHERE id_inscripcion = 2;
+ROLLBACK TO antes_de_cambio;
+COMMIT;
+    
