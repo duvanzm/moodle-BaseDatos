@@ -1,0 +1,69 @@
+1. Análisis del dominio (StreamHub) y diseño de documentos:
+Identifica colecciones necesarias (p. ej., usuarios, películas, series, valoraciones, listas).
+Define la estructura JSON de cada documento (campos, arreglos, documentos anidados).
+
+-- usuarios
+-- contenidos
+-- valoraciones
+-- listas
+
+usuarios:
+{
+  _id: ObjectId(),
+  nombre: "Duvan Zuluaga",
+  email: "duvan@gmail.com",
+  edad: 25,
+  pais: "Colombia",
+  plan: "premium",
+  historial_visto: [
+    {
+      contenido_id: ObjectId(),
+      fecha: ISODate("2025-02-10"),
+      progreso: 100
+    }
+  ]
+}
+
+contenidos:
+{
+  _id: ObjectId(),
+  titulo: "Inception",
+  tipo: "pelicula",
+  genero: ["Ciencia Ficcion", "Accion"],
+  duracion: 148,
+  anio: 2010,
+  rating_promedio: 4.5
+}
+
+valoraciones:
+{
+  _id: ObjectId(),
+  usuario_id: ObjectId(),
+  contenido_id: ObjectId(),
+  puntuacion: 5,
+  comentario: "Excelente pelicula",
+  fecha: ISODate("2025-02-15")
+}
+
+2. Inserción de datos:
+Población inicial con insertOne() y/o insertMany() en las colecciones definidas.
+Incluye variedad de casos (p. ej., películas con reseñas, usuarios con historial).
+
+db.usuarios.insertMany([
+  {
+    nombre: "Duvan Zuluaga",
+    email: "duvan@gmail.com",
+    edad: 25,
+    pais: "Colombia",
+    plan: "premium",
+    historial_visto: []
+  },
+  {
+    nombre: "Maria Lopez",
+    email: "maria@gmail.com",
+    edad: 30,
+    pais: "Mexico",
+    plan: "basico",
+    historial_visto: []
+  }
+])
