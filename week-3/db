@@ -67,3 +67,97 @@ db.usuarios.insertMany([
     historial_visto: []
   }
 ])
+
+3. Consultas (Lectura) con operadores:
+Realiza find() con filtros empleando $gt, $lt, $eq, $in, $and, $or, $regex.
+Ejemplos sugeridos:
+
+- Películas con duración > 120 min
+
+```
+db.contenidos.find({tipo: "pelicula",duracion: { $gt: 120 }})
+```
+
+- Usuarios que vieron > 5 contenidos
+
+```
+db.usuarios.find({$expr: {$gt: [ { $size: "$historial" }, 5 ]}})
+```
+
+- Usuarios mayores de 20 años y activos
+
+```
+db.usuarios.find({$and: [{ edad: { $gt: 20 } },{ activo: true }]})
+```
+
+- Contenidos de tipo serie o del año 2010
+
+```
+db.contenidos.find({$or: [{ tipo: "serie" },{ anio: { $eq: 2010 } }]})
+```
+
+- Buscar por género usando $in
+
+```
+db.contenidos.find({genero: { $in: ["Drama"] }})
+```
+
+- Buscar título que contenga "Matrix"
+
+```
+db.contenidos.find({titulo: { $regex: "Matrix", $options: "i" }})
+```
+
+4. Actualizaciones y eliminaciones:
+
+Modifica información con updateOne()/updateMany() (p. ej., actualizar calificación de un contenido).
+Elimina documentos con deleteOne()/deleteMany() cuando aplique.
+
+- Actualizar calificación
+
+```
+db.valoraciones.updateOne({ calificacion: 5 },{ $set: { calificacion: 4.8 } })
+```
+
+- Actualizar múltiples contenidos a no disponibles
+
+```
+db.contenidos.updateMany({ anio: { $lt: 2000 } },{ $set: { disponible: false } })
+```
+
+- Eliminar una valoración
+
+```
+db.valoraciones.deleteOne({ comentario: "Increíble película" })
+```
+ 
+- Eliminar contenidos no disponibles
+
+```
+db.contenidos.deleteMany({ disponible: false })
+```
+
+5. Índices para performance:
+Crea índices con createIndex() sobre campos consultados con frecuencia (p. ej., título, género).
+Verifica índices existentes con getIndexes() y documenta tus decisiones.
+ 
+
+- Crear índices
+
+```
+db.contenidos.createIndex({ titulo: 1 })
+```
+```
+db.contenidos.createIndex({ genero: 1 })
+```
+```
+db.usuarios.createIndex({ email: 1 }, { unique: true })
+```
+- Ver índices
+
+```
+db.contenidos.getIndexes()
+```
+```
+db.usuarios.getIndexes()
+```
